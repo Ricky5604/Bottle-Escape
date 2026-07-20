@@ -1,21 +1,20 @@
 using UnityEngine;
-using Unity.Cinemachine; // Unity 6 (Cinemachine v3) の必須宣言
+using Unity.Cinemachine;
 
 public class CameraController : MonoBehaviour
 {
     [Header("Cinemachineの設定")]
-    // インスペクターから、あなたの Cinemachine Camera をドラッグ＆ドロップします
     public CinemachineCamera cinemachineCamera;
 
-    [Header("カメラの距離設定")]
-    public float height = 3f;       // カメラの高さ
-    public float distance = 15f;     // プレイヤーからの距離
+    [Header("追従するプレイヤーを直接指定")]
+    // ★ここにヒエラルキーからPlayer（またはCameraTarget）を直接ドラッグ＆ドロップしてください
+    public Transform playerTransform; 
 
-    // 4方向のオフセット（位置）を管理する配列
-    private Vector3[] directionOffsets;
+    [Header("カメラの距離設定")]
+    public float height = 3f;       
+    public float distance = 15f;     
+
     private int currentDirectionIndex = 0; // 0:前, 1:右, 2:後, 3:左
-    
-    // CinemachineのFollowコンポーネントをコードから操作するための変数
     private CinemachineFollow cmFollow;
 
     void Start()
@@ -26,25 +25,14 @@ public class CameraController : MonoBehaviour
             return;
         }
 
-        // カメラから「CinemachineFollow」コンポーネントを取得する（v3の仕様）
         cmFollow = cinemachineCamera.GetComponent<CinemachineFollow>();
 
         if (cmFollow == null)
         {
-            Debug.LogError("Cinemachine Camera に 'Cinemachine Follow' が追加されていません。インスペクターを確認してください。");
+            Debug.LogError("Cinemachine Camera に 'Cinemachine Follow' が追加されていません。");
             return;
         }
 
-        // 東西南北の 4方向の Follow Offset をあらかじめ計算して登録
-        directionOffsets = new Vector3[]
-        {
-            new Vector3(0, height, -distance),  // 0: 前 (Front)
-            new Vector3(-distance, height, 0),  // 1: 右 (Right)
-            new Vector3(0, height, distance),   // 2: 後 (Back)
-            new Vector3(distance, height, 0)    // 3: 左 (Left)
-        };
-
-        // 初期位置を反映
         ApplyCameraOffset();
     }
 
@@ -52,28 +40,50 @@ public class CameraController : MonoBehaviour
     {
         if (cmFollow == null) return;
 
-        // Eキーで右回りに90度回転
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            currentDirectionIndex = (currentDirectionIndex + 1) % directionOffsets.Length;
-            ApplyCameraOffset();
+            currentDirectionIndex = (currentDirectionIndex + 1) % 4;
         }
 
-        // Qキーで左回りに90度回転
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             currentDirectionIndex--;
             if (currentDirectionIndex < 0)
             {
-                currentDirectionIndex = directionOffsets.Length - 1;
+                currentDirectionIndex = 3;
             }
-            ApplyCameraOffset();
         }
+
+        // プレイヤーの動きに合わせて、毎フレーム高さを計算して上書きする
+        ApplyCameraOffset();
     }
 
-    // 計算した Follow Offset を Cinemachine に直接流し込む処理
     void ApplyCameraOffset()
     {
-        cmFollow.FollowOffset = directionOffsets[currentDirectionIndex];
+        // プレイヤーが指定されていない場合は処理しない
+        if (playerTransform == null) return;
+
+        Vector3 targetOffset = Vector3.zero;
+
+        // 【確実なロジック】プレイヤーのワールド座標のYを直接取得し、相殺されないようにセットする
+        float playerY = playerTransform.position.y;
+
+        switch (currentDirectionIndex)
+        {
+            case 0: // 前
+                targetOffset = new Vector3(0, height + playerY, -distance);
+                break;
+            case 1: // 右
+                targetOffset = new Vector3(-distance, height + playerY, 0);
+                break;
+            case 2: // 後
+                targetOffset = new Vector3(0, height + playerY, distance);
+                break;
+            case 3: // 左
+                targetOffset = new Vector3(distance, height + playerY, 0);
+                break;
+        }
+
+        cmFollow.FollowOffset = targetOffset;
     }
 }

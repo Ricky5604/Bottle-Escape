@@ -3285,6 +3285,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 6, z: 1}
   m_Center: {x: 0, y: 4, z: 0}
+--- !u!4 &1913878639 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f9d388c8f31867f48ab15e97fc3f2dec, type: 3}
+  m_PrefabInstance: {fileID: 1967537678}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1967537678
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3511,7 +3516,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TrackerSettings:
     BindingMode: 4
-    PositionDamping: {x: 1, y: 1, z: 1}
+    PositionDamping: {x: 1, y: 0, z: 1}
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
@@ -3601,7 +3606,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cinemachineCamera: {fileID: 2083624975}
-  height: 2
+  playerTransform: {fileID: 1913878639}
+  height: 0
   distance: 50
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
