@@ -9,7 +9,7 @@ public class CameraController : MonoBehaviour
 
     [Header("カメラの距離設定")]
     public float height = 3f;       // カメラの高さ
-    public float distance = 10f;     // プレイヤーからの距離
+    public float distance = 15f;     // プレイヤーからの距離
 
     // 4方向のオフセット（位置）を管理する配列
     private Vector3[] directionOffsets;
